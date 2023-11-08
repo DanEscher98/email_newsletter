@@ -1,0 +1,7 @@
+{
+  "DB_USER": "postgres",
+  "DB_PASSWORD": "password",
+  "DB_NAME": "newsletter",
+  "DB_PORT": "5432",
+  "CONTAINER_ID": "1e44e981be6c0124a4d645ebfb94ab4b7a487ac3781d4c414b3b4a621f925739"
+}
