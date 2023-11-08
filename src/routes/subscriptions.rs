@@ -10,11 +10,6 @@ pub struct FormData {
 }
 
 pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    log::info!(
-        "Adding '{}' '{}' as a new subscriber.",
-        form.email,
-        form.name
-    );
     let result = sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
