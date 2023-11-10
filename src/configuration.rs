@@ -2,7 +2,11 @@ use config::{Config, ConfigError, File, FileFormat};
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::postgres::PgConnectOptions;
+use sqlx::{
+    postgres::{PgConnectOptions, PgSslMode},
+    ConnectOptions,
+};
+use tracing;
 
 #[derive(Deserialize)]
 pub struct Settings {
@@ -31,6 +35,7 @@ pub struct DatabaseSettings {
     pub database_name: String,
     pub username: String,
     pub password: Secret<String>,
+    pub require_ssl: bool, // Set connection to be encrypted or not
 }
 
 impl DatabaseSettings {
@@ -54,14 +59,22 @@ impl DatabaseSettings {
         ))
     }
     pub fn without_db(&self) -> PgConnectOptions {
+        let ssl_mode = if self.require_ssl {
+            PgSslMode::Require
+        } else {
+            PgSslMode::Prefer // try an encrypted connection
+        };
         PgConnectOptions::new()
             .username(&self.username)
             .password(self.password.expose_secret())
             .host(&self.host)
             .port(self.port)
+            .ssl_mode(ssl_mode)
     }
     pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db().database(&self.database_name)
+        self.without_db()
+            .database(&self.database_name)
+            .log_statements(tracing::log::LevelFilter::Trace)
     }
 }
 
