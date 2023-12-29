@@ -10,6 +10,10 @@ DB_PSWD   := `yq '.database.password' config/base.yaml`
 test:
   @curl -v http://localhost:8084/health_check
 
+sub email name:
+  curl -i -X POST -d 'email={{email}}&name={{name}}' \
+    https://127.0.0.1:8084/subscriptions
+
 pg_url: 
   @echo "postgres://{{DB_USER}}:{{DB_PSWD}}@localhost:5434/{{DB_NAME}}"
 
