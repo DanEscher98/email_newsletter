@@ -25,7 +25,7 @@ RUN cargo build --release --bin newsletter
 FROM debian:bullseye-slim AS runtime
 WORKDIR /app
 RUN apt-get update -y \
-  && apt-get install -y --no-install-recommends openssl ca-certificates postgresql-client \
+  && apt-get install -y --no-install-recommends openssl ca-certificates postgresql-client curl \
   # Clean up
   && apt-get autoremove -y \
   && apt-get clean -y \

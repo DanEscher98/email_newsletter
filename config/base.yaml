@@ -1,5 +1,3 @@
-application:
-  port: 8000
 database:
   database_name: "newsletter"
   username: "danescher98"

@@ -9,7 +9,7 @@ services:
     restart: always
     container_name: rust_server
     ports:
-      - "8082:8080"
+      - "8084:8000"
     networks:
       - front-tier
       - back-tier
