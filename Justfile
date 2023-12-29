@@ -11,10 +11,10 @@ test_db:
   @curl -sSX GET http://{{APP_HOST}}:{{APP_PORT}}/test_db/ | jq
 
 pg_url: 
-  @echo "postgres://{{DB_USER}}:{{DB_PSWD}}@localhost:{{DB_PORT}}/{{DB_NAME}}"
+  @echo "postgres://{{DB_USER}}:{{DB_PSWD}}@localhost:5434/{{DB_NAME}}"
 
 psql:
-  @psql -h localhost -U {{DB_USER}} -p {{DB_PORT}} -d {{DB_NAME}} -W
+  @psql -h localhost -U {{DB_USER}} -p 5434 -d {{DB_NAME}} -W
 
 migrate:
   sqlx database create --database-url="$(just pg_url)"

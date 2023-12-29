@@ -12,6 +12,7 @@ FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
 # Just building deps
 RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo install livejq
 
 COPY . .
 ENV SQLX_OFFLINE true
@@ -19,13 +20,12 @@ ENV SQLX_OFFLINE true
 # RUN sqlx database create --database-url=$DATABASE_URL; \
 #   sqlx migrate run --database-url=$DATABASE_URL
 RUN cargo build --release --bin newsletter
-RUN cargo install livejq
-RUN echo `whereis livejq`
+
 
 FROM debian:bullseye-slim AS runtime
 WORKDIR /app
 RUN apt-get update -y \
-  && apt-get install -y --no-install-recommends openssl ca-certificates jq \
+  && apt-get install -y --no-install-recommends openssl ca-certificates postgresql-client \
   # Clean up
   && apt-get autoremove -y \
   && apt-get clean -y \

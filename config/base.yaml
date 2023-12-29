@@ -1,8 +1,6 @@
 application:
   port: 8000
 database:
-  port: 5432
-  host: "db"
   database_name: "newsletter"
   username: "danescher98"
   password: 1234
