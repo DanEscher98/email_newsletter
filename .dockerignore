@@ -1,0 +1,10 @@
+.env
+compose.yaml
+*.md
+*.Dockerfile
+Justfile
+docs/
+target/
+tests/
+scripts/
+migrations/

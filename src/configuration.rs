@@ -39,25 +39,6 @@ pub struct DatabaseSettings {
 }
 
 impl DatabaseSettings {
-    pub fn connection_url(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port,
-            self.database_name
-        ))
-    }
-    pub fn connection_url_without_db(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port
-        ))
-    }
     pub fn without_db(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {
             PgSslMode::Require
@@ -87,7 +68,7 @@ fn pathbuf_to_string(path: std::path::PathBuf) -> String {
 pub fn get_configuration() -> Result<Settings, ConfigError> {
     // Initialize our configuration reader
     let working_path = std::env::current_dir().expect("Failed to determine the current directory.");
-    let configuration_directory = working_path.join("configuration");
+    let configuration_directory = working_path.join("config");
 
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
         .unwrap_or_else(|_| "local".into())

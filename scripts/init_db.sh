@@ -16,6 +16,7 @@ DB_USER="${POSTGRES_USER:=postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRRES_PORT:=5432}"
+HOST="localhost"
 
 function create_container() {
   echo "$(podman create \
@@ -56,7 +57,7 @@ RUNNING=$(podman inspect $CONTAINER_ID | jq '.[0].State.Running')
 if [ "$RUNNING" = "true" ]; then
   # Keep pinging Postgres until it's ready to accept commands
   export PGPASSWORD="${DB_PASSWORD}"
-  until psql -h "localhost" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
+  until psql -h "${HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
     >&2 echo "Postgres is still unavailable - sleeping"
     sleep 1
   done
@@ -66,7 +67,7 @@ else
   podman inspect "$CONTAINER_ID" 2>/dev/null | jq --tab -C '.[0].State' >/dev/tty
 fi
 
-DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
+DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${DB_NAME}"
 echo "DATABASE_URL: $DATABASE_URL"
 sqlx database create --database-url="$DATABASE_URL"
 sqlx migrate run --database-url="$DATABASE_URL"

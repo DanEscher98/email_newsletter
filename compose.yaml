@@ -1,0 +1,50 @@
+version: '3.8'
+name: email-newsletter
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: email.Dockerfile
+    restart: always
+    container_name: rust_server
+    ports:
+      - "8082:8080"
+    networks:
+      - front-tier
+      - back-tier
+    env_file: .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    container_name: psql_db
+    environment:
+      POSTGRES_DB: newsletter
+      POSTGRES_USER: danescher98
+      POSTGRES_PASSWORD: 1234
+    restart: always
+    networks:
+      - back-tier
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data:Z
+      - ./migrations:/migrations:Z
+
+volumes:
+  db-data:
+    driver: local
+
+configs:
+  httpd-config:
+    external: true
+
+secrets:
+  server-certificate:
+    external: true
+
+networks:
+  front-tier: {}
+  back-tier: {}
