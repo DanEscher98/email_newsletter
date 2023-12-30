@@ -1,6 +1,0 @@
-application:
-  host: 127.0.0.1
-database:
-  port: 5434
-  host: "localhost"
-  require_ssl: false
