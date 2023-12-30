@@ -1,28 +1,25 @@
-APP_PORT  := `yq '.application.port' config/base.yaml`
-APP_HOST  := `yq '.application.host' config/local.yaml`
+set dotenv-load := true
 
-DB_HOST   := `yq '.database.host' config/base.yaml`
-DB_PORT   := `yq '.database.port' config/base.yaml`
-DB_NAME   := `yq '.database.database_name' config/base.yaml`
-DB_USER   := `yq '.database.username' config/base.yaml`
-DB_PSWD   := `yq '.database.password' config/base.yaml`
+DB_URL    := env_var('DATABASE_URL')
+DB_USER   := env_var('DB_USER')
+DB_PSWD   := env_var('DB_PSWD')
+DB_NAME   := env_var('DB_NAME')
+DB_PORT   := env_var('DOCKER_DB_PORT')
+APP_PORT  := env_var('DOCKER_APP_PORT')
 
 test:
-  @curl -v http://localhost:8084/health_check
+  @curl -v http://localhost:{{APP_PORT}}/health_check
 
 sub email name:
-  curl -i -X POST -d 'email={{email}}&name={{name}}' \
-    https://127.0.0.1:8084/subscriptions
-
-pg_url: 
-  @echo "postgres://{{DB_USER}}:{{DB_PSWD}}@localhost:5434/{{DB_NAME}}"
+  curl -i -k --http3 -X POST -d 'email={{email}}&name={{name}}' \
+    http://localhost:{{APP_PORT}}/subscriptions
 
 psql:
-  @psql -h localhost -U {{DB_USER}} -p 5434 -d {{DB_NAME}} -W
+  @psql -h localhost -U {{DB_USER}} -p {{DB_PORT}} -d {{DB_NAME}} -W
 
 migrate:
-  sqlx database create --database-url="$(just pg_url)"
-  sqlx migrate run --database-url="$(just pg_url)"
+  sqlx database create --database-url={{DB_URL}}
+  sqlx migrate run --database-url={{DB_URL}}
 
 build:
   @# docker compose -f compose.yaml down

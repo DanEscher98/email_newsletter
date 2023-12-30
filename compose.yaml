@@ -9,7 +9,7 @@ services:
     restart: always
     container_name: rust_server
     ports:
-      - "8084:8000"
+      - "${DOCKER_APP_PORT}:${APP_PORT}"
     networks:
       - front-tier
       - back-tier
@@ -21,14 +21,14 @@ services:
     image: postgres:latest
     container_name: psql_db
     environment:
-      POSTGRES_DB: newsletter
-      POSTGRES_USER: danescher98
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PSWD}
     restart: always
     networks:
       - back-tier
     ports:
-      - "5434:5432"
+      - "${DOCKER_DB_PORT}:${DB_PORT}"
     volumes:
       - db-data:/var/lib/postgresql/data:Z
       - ./migrations:/migrations:Z

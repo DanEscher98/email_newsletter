@@ -25,6 +25,26 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
+    pub db_config: DatabaseSettings,
+}
+
+impl TestApp {
+    /// removes the mock database to avoid to polutte the DB
+    async fn remove_database(&self) -> Result<(), sqlx::Error> {
+        self.db_pool.close().await;
+
+        PgConnection::connect_with(&self.db_config.without_db().database("postgres"))
+            .await?
+            .execute(
+                format!(
+                    r#"DROP DATABASE IF EXISTS "{}";"#,
+                    self.db_config.database_name
+                )
+                .as_str(),
+            )
+            .await?;
+        Ok(())
+    }
 }
 
 async fn spawn_app() -> TestApp {
@@ -44,12 +64,13 @@ async fn spawn_app() -> TestApp {
     TestApp {
         address,
         db_pool: connection_pool,
+        db_config: configuration.database,
     }
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create database that connects to the Postgres instance, not a specific logical database
-    let mut connection = PgConnection::connect_with(&config.without_db())
+    let mut connection = PgConnection::connect_with(&config.without_db().database("postgres"))
         .await
         .expect("Failed to connect to Postgres");
     connection
@@ -85,6 +106,8 @@ async fn health_check_works() {
     // Assert
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
+
+    app.remove_database().await.unwrap();
 }
 
 #[tokio::test]
@@ -111,6 +134,8 @@ async fn subscribe_valid_form_data_gives_200() {
         .expect("Failed to fetch saved subscription.");
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
+
+    app.remove_database().await.unwrap();
 }
 
 #[tokio::test]
