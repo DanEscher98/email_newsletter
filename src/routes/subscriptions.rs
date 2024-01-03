@@ -1,4 +1,4 @@
-use crate::domain::{FormData, NewSubscriber};
+use crate::domain::{FormData, Subscriber};
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use sqlx::PgPool;
@@ -15,7 +15,7 @@ use uuid::Uuid;
     )
 )]
 pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let new_subscriber = match NewSubscriber::parse(form.0) {
+    let new_subscriber = match Subscriber::parse(form.0) {
         Ok(subscriber) => subscriber,
         Err(e) => {
             tracing::error!("Bad Request: {:?}", e);
@@ -35,7 +35,7 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<PgPool>) -> Ht
     skip(new_subscriber, pool)
 )]
 pub async fn insert_subscriber(
-    new_subscriber: &NewSubscriber,
+    new_subscriber: &Subscriber,
     pool: &PgPool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(

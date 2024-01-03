@@ -1,3 +1,4 @@
+use crate::{domain::ValidEmail, email_client::EmailClient};
 use config::{Config, ConfigError, File, FileFormat};
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
@@ -12,6 +13,7 @@ use tracing;
 pub struct Settings {
     pub application: ApplicationSettings,
     pub database: DatabaseSettings,
+    pub email_client: EmailClientSettings,
 }
 
 #[derive(Deserialize)]
@@ -56,6 +58,20 @@ impl DatabaseSettings {
         self.without_db()
             .database(&self.database_name)
             .log_statements(tracing::log::LevelFilter::Trace)
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub struct EmailClientSettings {
+    pub base_url: String,
+    pub sender_email: String,
+}
+
+impl EmailClientSettings {
+    pub fn email_client(&self) -> EmailClient {
+        let email_address =
+            ValidEmail::parse(self.sender_email.clone()).expect("Invalid sener email address");
+        EmailClient::new(self.base_url.clone(), email_address)
     }
 }
 

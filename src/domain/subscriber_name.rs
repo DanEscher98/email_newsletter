@@ -16,7 +16,7 @@ impl SubscriberName {
         let contains_forbidden_chars = s.chars().any(|g| forbidden_chars.contains(&g));
 
         if is_empty_or_whitespace || is_too_long || contains_forbidden_chars {
-            Err(anyhow!(format!("{} is not a valid subscriber name", s)))
+            Err(anyhow!(format!("{} is not a valid subscriber name.", s)))
         } else {
             Ok(Self(String::from(s.trim())))
         }

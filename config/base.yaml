@@ -4,3 +4,6 @@ database:
   database_name: "newsletter"
   username: "danescher98"
   password: 1234
+email_client:
+  base_url: "localhost"
+  sender_email: "dasa.escline@gmail.com"

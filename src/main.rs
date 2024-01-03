@@ -15,8 +15,11 @@ async fn main() -> std::io::Result<()> {
     let connection_pool = PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(2))
         .connect_lazy_with(configuration.database.with_db());
+
+    let email_client = configuration.email_client.email_client();
+
     let address = configuration.application.host_address();
     let listener = TcpListener::bind(address)?;
-    // let _ = listener.local_addr().unwrap().port();
-    run(listener, connection_pool)?.await
+
+    run(listener, connection_pool, email_client)?.await
 }

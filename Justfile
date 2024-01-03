@@ -11,7 +11,9 @@ test:
   @curl -v http://localhost:{{APP_PORT}}/health_check
 
 sub email name port=(APP_PORT):
-  @curl -i -k --http3 -X POST -d 'email={{email}}&name={{name}}' \
+  @payload=$(python -c "from urllib.parse import quote; \
+    print(f'email={quote(\"{{email}}\")}&name={quote(\"{{name}}\")}')");\
+  curl -i -k --http3 -X POST -d "$payload" \
     http://localhost:{{port}}/subscriptions
 
 psql:
@@ -46,3 +48,6 @@ show_data table="subscriptions":
   @export PGPASSFILE=".pgpass_db";\
   PSQL="psql -h localhost -U {{DB_USER}} -p {{DB_PORT}} -d {{DB_NAME}}";\
   $PSQL -c "SELECT email, name, subscribed_at FROM {{table}};"
+
+ngrok:
+  ngrok http {{APP_PORT}}
