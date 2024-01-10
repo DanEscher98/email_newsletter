@@ -5,6 +5,8 @@ compose.yaml
 Justfile
 */**/docs/
 */**/target/
+*/**/bin
+*/**/obj
 */**/tests/
 scripts/
 migrations/

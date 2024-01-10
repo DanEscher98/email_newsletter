@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/dany98/Working/projectsNice/email_newsletter/rmq_email/rmq_email.csproj",
+      "projectUniqueName": "/home/dany98/Working/projectsNice/email_newsletter/email_rmq/rmq_email.csproj",
       "projectName": "rmq_email",
-      "projectPath": "/home/dany98/Working/projectsNice/email_newsletter/rmq_email/rmq_email.csproj",
+      "projectPath": "/home/dany98/Working/projectsNice/email_newsletter/email_rmq/rmq_email.csproj",
       "packagesPath": "/home/dany98/.nuget/packages/",
-      "outputPath": "/home/dany98/Working/projectsNice/email_newsletter/rmq_email/obj/",
+      "outputPath": "/home/dany98/Working/projectsNice/email_newsletter/email_rmq/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/dany98/.nuget/NuGet/NuGet.Config"
