@@ -1,4 +1,15 @@
-FROM ubuntu:latest
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /source
+
+COPY *.sln .
+COPY *.csproj .
+RUN dotnet restore -v d
+
+COPY src/ config/ .
+RUN dotnet publish -c Release --self-contained -r linux-x64 -f net8.0 -o /app --no-restore
+
+
+FROM ubuntu:latest as runtime
 
 ARG EMAIL
 ARG EMAIL_PASSWORD
@@ -11,11 +22,13 @@ RUN apt-get update && \
     apt install -y postfix
 
 COPY config/main.cf /etc/postfix/main.cf
-
 RUN sh -c 'echo "root: ${EMAIL}" >> /etc/aliases' && \
     sh -c 'echo "${MAIL_NAME}" >> /etc/mailname' && \
     sh -c 'echo "[${SMTP_DOMAIN}]:${SMTP_PORT} ${EMAIL}:${EMAIL_PASSWORD}" >> /etc/postfix/sasl_passwd' && \
     postmap /etc/postfix/sasl_passwd && \
     chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
+CMD service postfix restart
 
-CMD service postfix restart && tail -f /dev/null
+COPY --from=build /app .
+ENTRYPOINT ["tail", "/dev/null"]
+

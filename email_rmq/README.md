@@ -1,0 +1,3 @@
+- [ ] Setup logging
+- [ ] Connect to RabbitMQ
+    - channel `send_email`

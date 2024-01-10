@@ -1,5 +1,7 @@
 set dotenv-load := true
 
+DOCKER := "docker --context desktop-linux"
+
 DB_URL    := env_var('DATABASE_URL')
 DB_USER   := env_var('DB_USER')
 DB_PSWD   := env_var('DB_PSWD')
@@ -26,7 +28,7 @@ migrate:
   sqlx migrate run --database-url={{DB_URL}}
 
 up:
-  docker compose -f compose.yaml up -d --build
+  {{DOCKER}} compose -f compose.yaml up -d --build
 
 drop_mockdb:
   @export PGPASSFILE=".pgpass_pg";\
