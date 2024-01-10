@@ -6,6 +6,7 @@ DB_PSWD   := env_var('DB_PSWD')
 DB_NAME   := env_var('DB_NAME')
 DB_PORT   := env_var('DOCKER_DB_PORT')
 APP_PORT  := env_var('DOCKER_APP_PORT')
+RMQ_PORT  := env_var('DOCKER_RMQ_UI_PORT')
 
 test:
   @curl -v http://localhost:{{APP_PORT}}/health_check
@@ -24,8 +25,7 @@ migrate:
   sqlx database create --database-url={{DB_URL}}
   sqlx migrate run --database-url={{DB_URL}}
 
-build:
-  @# docker compose -f compose.yaml down
+up:
   docker compose -f compose.yaml up -d --build
 
 drop_mockdb:
@@ -51,3 +51,6 @@ show_data table="subscriptions":
 
 ngrok:
   ngrok http {{APP_PORT}}
+
+rabbitmq:
+  firefox http://localhost:{{RMQ_PORT}}

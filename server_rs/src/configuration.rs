@@ -1,5 +1,6 @@
 use crate::{domain::ValidEmail, email_client::EmailClient};
 use config::{Config, ConfigError, File, FileFormat};
+use reqwest;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
@@ -70,8 +71,10 @@ pub struct EmailClientSettings {
 impl EmailClientSettings {
     pub fn email_client(&self) -> EmailClient {
         let email_address =
-            ValidEmail::parse(self.sender_email.clone()).expect("Invalid sener email address");
-        EmailClient::new(self.base_url.clone(), email_address)
+            ValidEmail::parse(self.sender_email.clone()).expect("Invalid sender email address");
+        dbg!(self.base_url.clone());
+        let base_url = reqwest::Url::parse(self.base_url.as_ref()).expect("Invalid base_url");
+        EmailClient::new(base_url, email_address)
     }
 }
 

@@ -1,15 +1,15 @@
 use crate::domain::ValidEmail;
-use reqwest::Client;
+use reqwest::{Client, Url};
 
 #[derive(Clone)]
 pub struct EmailClient {
     http_client: Client,
-    base_url: String,
+    base_url: Url,
     sender: ValidEmail,
 }
 
 impl EmailClient {
-    pub fn new(base_url: String, sender: ValidEmail) -> Self {
+    pub fn new(base_url: Url, sender: ValidEmail) -> Self {
         Self {
             http_client: Client::new(),
             base_url,
@@ -22,9 +22,27 @@ impl EmailClient {
         subject: &str,
         html_content: &str,
         text_content: &str,
-    ) -> Result<(), String> {
+    ) -> anyhow::Result<()> {
+        let url = self.base_url.join("email")?;
+        let request_body = SendEmailRequest {
+            from: self.sender.as_ref().to_owned(),
+            to: recipient.as_ref().to_owned(),
+            subject: subject.to_owned(),
+            html_body: html_content.to_owned(),
+            text_body: text_content.to_owned(),
+        };
+        let builder = self.http_client.post(url).json(&request_body);
         Ok(())
     }
+}
+
+#[derive(serde::Serialize)]
+struct SendEmailRequest {
+    from: String,
+    to: String,
+    subject: String,
+    html_body: String,
+    text_body: String,
 }
 
 #[cfg(test)]
@@ -37,6 +55,7 @@ mod tests {
         },
         Fake, Faker,
     };
+    use reqwest::Url;
     use wiremock::{matchers::any, Mock, MockServer, ResponseTemplate};
 
     #[tokio::test]
@@ -44,7 +63,8 @@ mod tests {
         // Arrange
         let mock_server = MockServer::start().await;
         let sender = ValidEmail::parse(SafeEmail().fake()).unwrap();
-        let email_client = EmailClient::new(mock_server.uri(), sender);
+        let uri = Url::parse(mock_server.uri().as_ref()).unwrap();
+        let email_client = EmailClient::new(uri, sender);
 
         Mock::given(any())
             .respond_with(ResponseTemplate::new(200))

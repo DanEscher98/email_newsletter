@@ -1,10 +1,10 @@
 .env
 compose.yaml
-*.md
-*.Dockerfile
+*/**/*.md
+*/**/Dockerfile
 Justfile
-docs/
-target/
-tests/
+*/**/docs/
+*/**/target/
+*/**/tests/
 scripts/
 migrations/
