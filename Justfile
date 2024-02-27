@@ -1,7 +1,5 @@
 set dotenv-load := true
 
-DOCKER := "docker --context desktop-linux"
-
 DB_URL    := env_var('DATABASE_URL')
 DB_USER   := env_var('DB_USER')
 DB_PSWD   := env_var('DB_PSWD')
@@ -27,8 +25,8 @@ migrate:
   sqlx database create --database-url={{DB_URL}}
   sqlx migrate run --database-url={{DB_URL}}
 
-up:
-  {{DOCKER}} compose -f compose.yaml up -d --build
+up context="desktop-linux":
+  docker --context {{context}} compose -f compose.yaml up -d --build
 
 drop_mockdb:
   @export PGPASSFILE=".pgpass_pg";\
@@ -56,3 +54,10 @@ ngrok:
 
 rabbitmq:
   firefox http://localhost:{{RMQ_PORT}}
+
+prepare:
+  cd server_rs; cargo sqlx prepare -D {{DB_URL}} -- --all-targets --all-features
+
+watch:
+  cd server_rs;\
+  SQLX_OFFLINE=true cargo watch -x check -x 'test -- --nocapture'

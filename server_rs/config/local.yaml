@@ -4,3 +4,6 @@ database:
   port: 5434
   host: "localhost"
   require_ssl: false
+email_rmq:
+  rmq_host: "localhost"
+  rmq_port: 5672

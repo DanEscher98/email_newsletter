@@ -4,6 +4,9 @@ database:
   database_name: "newsletter"
   username: "danescher98"
   password: 1234
-email_client:
-  base_url: "http://127.0.0.1"
-  sender_email: "dasa.escline@gmail.com"
+email_rmq:
+  sender_email: "danyiel5978@gmail.com"
+  rmq_exchange: "subscribers"
+  rmq_user: "guest"
+  rmq_pswd: "guest"
+

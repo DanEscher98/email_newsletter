@@ -1,6 +1,5 @@
-use crate::{domain::ValidEmail, email_client::EmailClient};
+use crate::{domain::ValidEmail, email_rmq::EmailRmq};
 use config::{Config, ConfigError, File, FileFormat};
-use reqwest;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
@@ -14,7 +13,7 @@ use tracing;
 pub struct Settings {
     pub application: ApplicationSettings,
     pub database: DatabaseSettings,
-    pub email_client: EmailClientSettings,
+    pub email_rmq: EmailRMQSettings,
 }
 
 #[derive(Deserialize)]
@@ -63,20 +62,50 @@ impl DatabaseSettings {
 }
 
 #[derive(serde::Deserialize)]
-pub struct EmailClientSettings {
-    pub base_url: String,
+pub struct EmailRMQSettings {
     pub sender_email: String,
+    pub rmq_exchange: String,
+    pub rmq_user: String,
+    pub rmq_pswd: Secret<String>,
+    pub rmq_host: String,
+    pub rmq_port: u16,
 }
 
-impl EmailClientSettings {
-    pub fn email_client(&self) -> EmailClient {
+impl EmailRMQSettings {
+    fn url(&self) -> String {
+        // amqp://guest:guest@localhost:5672
+        format!(
+            "amqp://{}:{}@{}:{}",
+            self.rmq_user,
+            self.rmq_pswd.expose_secret(),
+            self.rmq_host,
+            self.rmq_port
+        )
+    }
+    pub async fn get(&self) -> EmailRmq {
         let email_address =
             ValidEmail::parse(self.sender_email.clone()).expect("Invalid sender email address");
-        dbg!(self.base_url.clone());
-        let base_url = reqwest::Url::parse(self.base_url.as_ref()).expect("Invalid base_url");
-        EmailClient::new(base_url, email_address)
+        EmailRmq::new(self.url(), email_address, "Email".to_string())
+            .await
+            .expect("Can't init RabbitMQ")
     }
 }
+
+// #[derive(serde::Deserialize)]
+// pub struct EmailClientSettings {
+//     pub base_url: String,
+//     pub sender_email: String,
+// }
+//
+// impl EmailClientSettings {
+//     pub fn email_client(&self) -> EmailClient {
+//         let email_address =
+//             ValidEmail::parse(self.sender_email.clone()).expect("Invalid sender email address");
+//         dbg!(self.base_url.clone());
+//         let base_url = reqwest::Url::parse(self.base_url.as_ref()).expect("Invalid base_url");
+//         EmailClient::new(base_url, email_address)
+//     }
+// }
 
 fn pathbuf_to_string(path: std::path::PathBuf) -> String {
     path.into_os_string()

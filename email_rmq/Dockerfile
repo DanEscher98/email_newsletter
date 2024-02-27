@@ -6,10 +6,11 @@ COPY *.csproj .
 RUN dotnet restore -v d
 
 COPY src/ config/ .
-RUN dotnet publish -c Release --self-contained -r linux-x64 -f net8.0 -o /app --no-restore
+RUN dotnet publish -c Release --self-contained -r linux-x64 -f net8.0 \
+      -v detailed -o /app --no-restore
 
 
-FROM ubuntu:latest as runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 as runtime
 
 ARG EMAIL
 ARG EMAIL_PASSWORD
@@ -29,6 +30,6 @@ RUN sh -c 'echo "root: ${EMAIL}" >> /etc/aliases' && \
     chmod 0600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
 CMD service postfix restart
 
-COPY --from=build /app .
-ENTRYPOINT ["tail", "/dev/null"]
-
+WORKDIR /app
+COPY --from=build /app/ .
+ENTRYPOINT dotnet rmq_email.dll && tail -f /dev/null

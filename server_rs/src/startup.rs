@@ -1,5 +1,5 @@
 use crate::{
-    email_client::EmailClient,
+    email_rmq::EmailRmq,
     routes::{health_check::health_check, subscriptions::subscribe},
 };
 use actix_web::{dev::Server, web, App, HttpServer};
@@ -10,7 +10,7 @@ use tracing_actix_web::TracingLogger;
 pub fn run(
     listener: TcpListener,
     db_pool: PgPool,
-    email_client: EmailClient,
+    email_rmq: EmailRmq,
 ) -> Result<Server, std::io::Error> {
     // Wrap the connection in a smart pointer
     // equivalent to perform a `dependency injection` in other languages
@@ -23,7 +23,7 @@ pub fn run(
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             .app_data(db_pool.clone()) // Get a pointer copy
-            .app_data(email_client.clone())
+            .app_data(email_rmq.clone())
     })
     .listen(listener)?
     .run();
